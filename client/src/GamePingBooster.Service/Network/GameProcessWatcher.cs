@@ -10,8 +10,9 @@ namespace GamePingBooster.Service.Network;
 /// anything. That is a hard constraint of this project and the reason BattlEye has nothing to
 /// object to.
 ///
-/// Why watch at all: PUBG's IP ranges live on AWS/Azure alongside thousands of other services.
-/// Leaving the routes in place permanently would drag unrelated traffic through the relay.
+/// Why watch at all: Game server IP ranges (e.g. PUBG on AWS/Azure, Valve SDR relays) live
+/// alongside thousands of other services. Leaving the routes in place permanently would drag
+/// unrelated traffic through the relay.
 /// </summary>
 internal sealed class GameProcessWatcher : IDisposable
 {

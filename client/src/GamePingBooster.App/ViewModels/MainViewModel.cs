@@ -306,12 +306,22 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Games the user can choose to optimize. Shipped with the standard titles so the dropdown
+    /// is populated immediately; the service expands it when it reads custom profiles from disk.
+    /// </summary>
     public ObservableCollection<GameOptionItem> AvailableGames { get; } = [
         new GameOptionItem("cs2", "Counter-Strike 2"),
         new GameOptionItem("pubg", "PUBG: BATTLEGROUNDS")
     ];
 
     private GameOptionItem? _selectedGame;
+
+    /// <summary>
+    /// The game chosen for this session. Null until picked: auto-detecting across running games
+    /// caused ambiguity when launchers or multiple supported games ran at once, and a player
+    /// always knows which game they sat down to play.
+    /// </summary>
     public GameOptionItem? SelectedGame
     {
         get => _selectedGame;
@@ -319,6 +329,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             if (Set(ref _selectedGame, value))
             {
+                // Clear the validation prompt the instant the user picks a game.
                 if (value is not null && Error == "Please select a game first.")
                 {
                     Error = null;
@@ -540,6 +551,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
             else
             {
+                // Refuse to connect without a target game. Without one the service would either
+                // have to guess from running processes or wait indefinitely without knowing which
+                // routes to install.
                 if (SelectedGame is null)
                 {
                     Error = "Please select a game first.";
@@ -599,6 +613,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
         GameRunning = status.GameRunning;
         GameName = status.GameName;
 
+        // Append newly discovered profiles without clearing the collection. Calling Clear() resets
+        // the ComboBox's SelectedItem binding in Avalonia and drops what the user just clicked.
         if (status.AvailableGames.Count > 0)
         {
             foreach (var g in status.AvailableGames)
@@ -611,6 +627,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
         }
 
+        // Only adopt the service's selection if the user hasn't made one yet (e.g. on first launch).
+        // Once the user picks a game, the UI is authoritative.
         if (_selectedGame is null && !string.IsNullOrEmpty(status.SelectedGameId) && !string.Equals(status.SelectedGameId, "auto", StringComparison.OrdinalIgnoreCase))
         {
             var current = AvailableGames.FirstOrDefault(g => g.Id.Equals(status.SelectedGameId, StringComparison.OrdinalIgnoreCase));

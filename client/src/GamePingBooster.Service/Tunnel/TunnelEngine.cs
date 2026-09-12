@@ -418,10 +418,20 @@ internal sealed class TunnelEngine : IAsyncDisposable
 
                         foreach (var r in bundle.Relays)
                         {
-                            if (!combined.Relays.Any(x => string.Equals(x.Id, r.Id, StringComparison.OrdinalIgnoreCase) ||
-                                                          string.Equals(x.Endpoint, r.Endpoint, StringComparison.OrdinalIgnoreCase)))
+                            var existing = combined.Relays.FirstOrDefault(x => string.Equals(x.Endpoint, r.Endpoint, StringComparison.OrdinalIgnoreCase));
+                            if (existing is null)
                             {
-                                combined.Relays.Add(r);
+                                if (!combined.Relays.Any(x => string.Equals(x.Id, r.Id, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    combined.Relays.Add(r);
+                                }
+                            }
+                            else if (existing.Id.StartsWith("relay-", StringComparison.OrdinalIgnoreCase) && !r.Id.StartsWith("relay-", StringComparison.OrdinalIgnoreCase))
+                            {
+                                // A named profile relay (e.g. "sg") takes precedence over a generic placeholder ("relay-1").
+                                existing.Id = r.Id;
+                                existing.Name = r.Name;
+                                existing.Location = r.Location;
                             }
                         }
 
@@ -509,6 +519,9 @@ internal sealed class TunnelEngine : IAsyncDisposable
                 _log($"Could not reload the profile ({ex.Message}) - continuing with the one already loaded.");
             }
 
+            // Explicit game selection is required before bringing the tunnel up. Without one,
+            // the engine has no way of knowing which CIDR ranges to install, and auto-detect
+            // led to race conditions when multiple game clients or launchers ran simultaneously.
             _selectedGameId = string.IsNullOrWhiteSpace(gameId) ? _selectedGameId : gameId;
             if (string.IsNullOrWhiteSpace(_selectedGameId) || _selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
             {
@@ -561,7 +574,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
                 _log($"Game process {runningProc ?? "forced"}.exe is already running - installing routes for {_game.Name}.");
                 InstallLobbyRoutes();
                 InstallRoutes();
-                SetState(TunnelState.Connected, $"Accelerating {_game.Name} through {_relay.Name}");
+                SetState(TunnelState.Connected, $"Optimizing {_game.Name} through {_relay.Name}");
             }
             else
             {
@@ -1521,7 +1534,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
                 _log($"Detected {processName}.exe running - installing routes for {_game?.Name}.");
                 InstallLobbyRoutes();
                 InstallRoutes();
-                SetState(TunnelState.Connected, $"Accelerating {_game?.Name} through {_relay?.Name}");
+                SetState(TunnelState.Connected, $"Optimizing {_game?.Name} through {_relay?.Name}");
             }
             else
             {
@@ -1601,6 +1614,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
 
     public void SetSelectedGame(string? gameId)
     {
+        // Ignore blank or obsolete "auto" verbs from older callers.
         if (string.IsNullOrWhiteSpace(gameId) || gameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
         {
             return;

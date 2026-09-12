@@ -68,7 +68,7 @@ public sealed class CommandMessage
     /// <summary>Relay id to use, e.g. "sg-1". Empty means let the service pick by ping.</summary>
     [JsonPropertyName("relayId")] public string? RelayId { get; set; }
 
-    /// <summary>Id of the game to accelerate, e.g. "pubg".</summary>
+    /// <summary>Id of the game to optimize, e.g. "cs2", "pubg".</summary>
     [JsonPropertyName("gameId")] public string? GameId { get; set; }
 
     // ------------------------------------------------------------------ set-token
@@ -202,7 +202,7 @@ public sealed class StatusMessage
     /// <summary>Games available in the loaded profile, for selection in the UI.</summary>
     [JsonPropertyName("availableGames")] public List<GameInfoItem> AvailableGames { get; set; } = [];
 
-    /// <summary>The game id selected by the user, or "auto" / null for automatic detection.</summary>
+    /// <summary>The game id selected by the user, or null if no game has been selected yet.</summary>
     [JsonPropertyName("selectedGameId")] public string? SelectedGameId { get; set; }
 
     /// <summary>Number of routes currently installed in the Windows routing table.</summary>

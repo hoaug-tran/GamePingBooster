@@ -187,7 +187,7 @@ internal sealed class RouteManager
         // already in the table, and teardown must still know to remove them.
         _installedPrefixes.AddRange(fresh);
 
-        // One process per route so each exit code is attributable. A real PUBG profile is a few
+        // One process per route so each exit code is attributable. A game profile is typically a few
         // dozen prefixes, so this costs a second or two - once, when the game starts. Worth it:
         // a route that silently fails to install looks exactly like a relay that is down.
         foreach (var cidr in fresh)

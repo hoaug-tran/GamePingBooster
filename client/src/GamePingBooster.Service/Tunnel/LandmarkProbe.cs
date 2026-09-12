@@ -7,11 +7,12 @@ namespace GamePingBooster.Service.Tunnel;
 /// <summary>
 /// Which datacentre the game is going to put this player in, measured rather than assumed.
 ///
-/// PUBG decides that for itself: before a match it probes one endpoint per Azure region on UDP
-/// 8081 and picks the nearest. Those endpoints are stable across sessions - unlike gameplay
-/// servers, which are allocated per match and never repeat - so they can be written into the
-/// profile as a <see cref="RegionEntry.Landmarks"/> list and used as a stand-in for the region
-/// itself. They sit in the region they represent and they answer ICMP, which is all this needs.
+/// Online games decide that for themselves: before a match PUBG probes one endpoint per Azure
+/// region on UDP 8081, Valve SDR checks regional coordinator clusters, and they pick the nearest.
+/// Those endpoints are stable across sessions - unlike gameplay servers, which are allocated per match
+/// and never repeat - so they can be written into the profile as a <see cref="RegionEntry.Landmarks"/> list
+/// and used as a stand-in for the region itself. They sit in the region they represent and they answer
+/// ICMP, which is all this needs.
 ///
 /// Two things are measured with them, and the difference matters:
 ///
