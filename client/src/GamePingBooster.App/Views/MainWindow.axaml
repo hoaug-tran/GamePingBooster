@@ -1,4 +1,4 @@
-﻿<views:SurfaceWindow xmlns="https://github.com/avaloniaui"
+<views:SurfaceWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:GamePingBooster.App.ViewModels"
         xmlns:views="using:GamePingBooster.App.Views"
@@ -61,11 +61,27 @@
 
     <!-- Header -->
     <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+      <!-- Game selector: Auto-detect or specific game -->
+      <ComboBox Grid.Column="0"
+                ItemsSource="{Binding AvailableGames}"
+                SelectedItem="{Binding SelectedGame}"
+                HorizontalAlignment="Left" VerticalAlignment="Center"
+                MinWidth="180" MaxWidth="280" Height="36"
+                Background="#242424" Foreground="#E0E0E0"
+                BorderThickness="0" CornerRadius="8"
+                ToolTip.Tip="Select game profile or Auto-detect">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:GameOptionItem">
+            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
       <!--
         Everything that is not Connect lives here. There were three buttons competing with the
         one that matters; now there is one primary action and a menu.
       -->
-      <Button Grid.Column="1" VerticalAlignment="Top"
+      <Button Grid.Column="1" VerticalAlignment="Center"
               Padding="10"
               Background="Transparent" BorderThickness="0"
               ToolTip.Tip="Menu">

@@ -51,7 +51,7 @@ internal sealed class GameProcessWatcher : IDisposable
             {
                 var found = FindRunningGame();
                 var running = found is not null;
-                if (running != IsGameRunning)
+                if (running != IsGameRunning || (running && !string.Equals(found, RunningProcessName, StringComparison.OrdinalIgnoreCase)))
                 {
                     IsGameRunning = running;
                     RunningProcessName = found;

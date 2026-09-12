@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace GamePingBooster.Core.Ipc;
 
@@ -199,6 +199,12 @@ public sealed class StatusMessage
     [JsonPropertyName("gameRunning")] public bool GameRunning { get; set; }
     [JsonPropertyName("gameName")] public string? GameName { get; set; }
 
+    /// <summary>Games available in the loaded profile, for selection in the UI.</summary>
+    [JsonPropertyName("availableGames")] public List<GameInfoItem> AvailableGames { get; set; } = [];
+
+    /// <summary>The game id selected by the user, or "auto" / null for automatic detection.</summary>
+    [JsonPropertyName("selectedGameId")] public string? SelectedGameId { get; set; }
+
     /// <summary>Number of routes currently installed in the Windows routing table.</summary>
     [JsonPropertyName("activeRoutes")] public int ActiveRoutes { get; set; }
 
@@ -336,6 +342,15 @@ public sealed class StatusMessage
 }
 
 /// <summary>
+/// A summary of a game declared in the active profile bundle.
+/// </summary>
+public sealed class GameInfoItem
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+}
+
+/// <summary>
 /// Source-generated JSON, required for Native AOT (the reflection-based serializer is trimmed away).
 /// </summary>
 [JsonSourceGenerationOptions(
@@ -343,4 +358,6 @@ public sealed class StatusMessage
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(CommandMessage))]
 [JsonSerializable(typeof(StatusMessage))]
+[JsonSerializable(typeof(GameInfoItem))]
+[JsonSerializable(typeof(List<GameInfoItem>))]
 public partial class IpcJsonContext : JsonSerializerContext;

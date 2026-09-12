@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -283,6 +284,23 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public ObservableCollection<GameOptionItem> AvailableGames { get; } = [
+        new GameOptionItem("auto", "Auto-detect")
+    ];
+
+    private GameOptionItem? _selectedGame;
+    public GameOptionItem? SelectedGame
+    {
+        get => _selectedGame ?? AvailableGames.FirstOrDefault();
+        set
+        {
+            if (Set(ref _selectedGame, value) && value is not null)
+            {
+                _ = _pipe.SelectGameAsync(value.Id);
+            }
+        }
+    }
+
     private string? _relayName;
     public string? RelayName
     {
@@ -455,7 +473,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             {
                 State = TunnelState.Connecting;
                 Detail = "Sending the request to the background service...";
-                await _pipe.ConnectTunnelAsync().ConfigureAwait(false);
+                await _pipe.ConnectTunnelAsync(gameId: SelectedGame?.Id).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -487,6 +505,42 @@ public sealed class MainViewModel : INotifyPropertyChanged
         LossRatio = status.LossRatio;
         GameRunning = status.GameRunning;
         GameName = status.GameName;
+
+        if (status.AvailableGames.Count > 0)
+        {
+            var options = new List<GameOptionItem> { new GameOptionItem("auto", "Auto-detect") };
+            foreach (var g in status.AvailableGames)
+            {
+                options.Add(new GameOptionItem(g.Id, g.Name));
+            }
+
+            bool match = AvailableGames.Count == options.Count;
+            if (match)
+            {
+                for (int i = 0; i < options.Count; i++)
+                {
+                    if (AvailableGames[i].Id != options[i].Id || AvailableGames[i].DisplayName != options[i].DisplayName)
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+            }
+            if (!match)
+            {
+                AvailableGames.Clear();
+                foreach (var opt in options) AvailableGames.Add(opt);
+            }
+        }
+
+        var targetId = string.IsNullOrEmpty(status.SelectedGameId) ? "auto" : status.SelectedGameId;
+        var current = AvailableGames.FirstOrDefault(g => g.Id.Equals(targetId, StringComparison.OrdinalIgnoreCase));
+        if (current is not null && (_selectedGame is null || !_selectedGame.Id.Equals(current.Id, StringComparison.OrdinalIgnoreCase)))
+        {
+            _selectedGame = current;
+            Raise(nameof(SelectedGame));
+        }
+
         RelayName = status.RelayName;
         RelayEndpoints = status.RelayEndpoints;
         Configured = status.Configured;
@@ -534,4 +588,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     private void Raise(string? name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+}
+
+/// <summary>
+/// A selectable game option in the UI dropdown.
+/// </summary>
+public sealed class GameOptionItem
+{
+    public string Id { get; }
+    public string DisplayName { get; }
+
+    public GameOptionItem(string id, string displayName)
+    {
+        Id = id;
+        DisplayName = displayName;
+    }
+
+    public override string ToString() => DisplayName;
+
+    public override bool Equals(object? obj) =>
+        obj is GameOptionItem other && string.Equals(Id, other.Id, StringComparison.OrdinalIgnoreCase);
+
+    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Id);
 }

@@ -95,6 +95,9 @@ public sealed class PipeClient : IAsyncDisposable
     public Task ConnectTunnelAsync(string? relayId = null, string? gameId = null)
         => SendAsync(new CommandMessage { Verb = "connect", RelayId = relayId, GameId = gameId });
 
+    public Task SelectGameAsync(string gameId)
+        => SendAsync(new CommandMessage { Verb = "select-game", GameId = gameId });
+
     public Task DisconnectTunnelAsync() => SendAsync(new CommandMessage { Verb = "disconnect" });
 
     public async ValueTask DisposeAsync()
