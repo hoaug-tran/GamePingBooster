@@ -22,7 +22,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _pipe = pipe;
         _pipe.StatusReceived += OnStatus;
         _pipe.Disconnected += OnDisconnected;
-        _selectedGame = AvailableGames[0];
     }
 
     // ------------------------------------------------------------ licence
@@ -116,6 +115,27 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     /// <summary>What the menu item says. One entry, two states, no dead end either way.</summary>
     public string AccountMenuText => HasToken ? "Account" : "Sign in";
+
+    // ------------------------------------------------------------ updates
+
+    private AvailableUpdate? _update;
+
+    /// <summary>A newer release found by UpdateChecker, or null. Set on the UI thread.</summary>
+    public AvailableUpdate? Update
+    {
+        get => _update;
+        set
+        {
+            if (!Set(ref _update, value)) return;
+            Raise(nameof(HasUpdate));
+            Raise(nameof(UpdateMenuText));
+        }
+    }
+
+    public bool HasUpdate => Update is not null;
+
+    /// <summary>The last line of the menu, and only there when a newer release exists.</summary>
+    public string UpdateMenuText => Update is null ? "" : $"Update to latest version (v{Update.Version})";
 
     /// <summary>
     /// The last thing the renewer had to say, if anything.
@@ -287,7 +307,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     public ObservableCollection<GameOptionItem> AvailableGames { get; } = [
-        new GameOptionItem("auto", "Auto-detect"),
         new GameOptionItem("cs2", "Counter-Strike 2"),
         new GameOptionItem("pubg", "PUBG: BATTLEGROUNDS")
     ];
@@ -295,13 +314,21 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private GameOptionItem? _selectedGame;
     public GameOptionItem? SelectedGame
     {
-        get => _selectedGame ?? AvailableGames.FirstOrDefault();
+        get => _selectedGame;
         set
         {
-            if (Set(ref _selectedGame, value) && value is not null)
+            if (Set(ref _selectedGame, value))
             {
+                if (value is not null && Error == "Please select a game first.")
+                {
+                    Error = null;
+                }
                 Raise(nameof(GameText));
-                _ = _pipe.SelectGameAsync(value.Id);
+                Raise(nameof(CanPressAction));
+                if (value is not null)
+                {
+                    _ = _pipe.SelectGameAsync(value.Id);
+                }
             }
         }
     }
@@ -413,19 +440,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         get
         {
-            var isAuto = SelectedGame is null || string.Equals(SelectedGame.Id, "auto", StringComparison.OrdinalIgnoreCase);
-            if (isAuto)
-            {
-                if (GameRunning && !string.IsNullOrEmpty(GameName))
-                {
-                    return $"{GameName} is running";
-                }
-                return State == TunnelState.Connected
-                    ? "Waiting for game to launch..."
-                    : "No game running";
-            }
+            if (SelectedGame is null) return "No game selected";
 
-            var targetName = SelectedGame?.DisplayName ?? "Game";
+            var targetName = SelectedGame.DisplayName;
             if (GameRunning && (string.IsNullOrEmpty(GameName) || string.Equals(GameName, targetName, StringComparison.OrdinalIgnoreCase)))
             {
                 return $"{targetName} is running";
@@ -489,8 +506,31 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task ToggleAsync()
+    // Set for the few seconds between pressing Connect and the connect reaching the service, while
+    // the profile is being fetched. A second press in that window would otherwise read the
+    // Connecting state, send a disconnect, and then watch the first press connect anyway.
+    private bool _connectInFlight;
+
+    /// <param name="profileSync">
+    /// When given, the latest profile is fetched from the licence server BEFORE the connect is sent.
+    ///
+    /// Without it, Connect used whatever profile was pulled when the app started, so a relay added
+    /// in the dashboard while the app was open simply did not exist until a restart - and the
+    /// lobby-tunnel switch could not reach a client that stayed open all day either.
+    ///
+    /// Ordering is what makes this work rather than a race: the fetch ends by writing set-profile
+    /// to the pipe, the service handles pipe commands one at a time in the order they arrive, and
+    /// ConnectAsync reloads the profile from disk. So the connect always sees the profile that was
+    /// just pushed.
+    ///
+    /// A fetch that fails never stops the connect. ProfileSync reports it and returns - offline,
+    /// licence server down, or the twelve-an-hour limit - and the service connects on the profile
+    /// it already has, which is exactly what pressing Connect did before this existed.
+    /// </param>
+    public async Task ToggleAsync(ProfileSync? profileSync = null)
     {
+        if (_connectInFlight) return;
+
         try
         {
             Error = null;
@@ -500,15 +540,39 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
             else
             {
+                if (SelectedGame is null)
+                {
+                    Error = "Please select a game first.";
+                    Detail = "Choose your game from the dropdown above before connecting.";
+                    return;
+                }
+
+                _connectInFlight = true;
                 State = TunnelState.Connecting;
+
+                if (profileSync is not null && !string.IsNullOrWhiteSpace(LicenceUrl))
+                {
+                    Detail = "Getting the latest server list...";
+                    // ConfigureAwait(true): this is called from a click on the UI thread, and the
+                    // next line raises PropertyChanged - off the UI thread that breaks Avalonia's
+                    // bindings in ways that surface later and somewhere else.
+                    await profileSync
+                        .SyncAsync(LicenceUrl, DevicePublicKey, SelectedGame.Id, force: true)
+                        .ConfigureAwait(true);
+                }
+
                 Detail = "Sending the request to the background service...";
-                await _pipe.ConnectTunnelAsync(gameId: SelectedGame?.Id).ConfigureAwait(false);
+                await _pipe.ConnectTunnelAsync(gameId: SelectedGame.Id).ConfigureAwait(true);
             }
         }
         catch (Exception ex)
         {
             State = TunnelState.Faulted;
             Error = ex.Message;
+        }
+        finally
+        {
+            _connectInFlight = false;
         }
     }
 
@@ -537,37 +601,25 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         if (status.AvailableGames.Count > 0)
         {
-            var options = new List<GameOptionItem> { new GameOptionItem("auto", "Auto-detect") };
             foreach (var g in status.AvailableGames)
             {
-                options.Add(new GameOptionItem(g.Id, g.Name));
-            }
-
-            bool match = AvailableGames.Count == options.Count;
-            if (match)
-            {
-                for (int i = 0; i < options.Count; i++)
+                if (string.Equals(g.Id, "auto", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!AvailableGames.Any(x => string.Equals(x.Id, g.Id, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (AvailableGames[i].Id != options[i].Id || AvailableGames[i].DisplayName != options[i].DisplayName)
-                    {
-                        match = false;
-                        break;
-                    }
+                    AvailableGames.Add(new GameOptionItem(g.Id, g.Name));
                 }
-            }
-            if (!match)
-            {
-                AvailableGames.Clear();
-                foreach (var opt in options) AvailableGames.Add(opt);
             }
         }
 
-        var targetId = string.IsNullOrEmpty(status.SelectedGameId) ? "auto" : status.SelectedGameId;
-        var current = AvailableGames.FirstOrDefault(g => g.Id.Equals(targetId, StringComparison.OrdinalIgnoreCase));
-        if (current is not null && (_selectedGame is null || !_selectedGame.Id.Equals(current.Id, StringComparison.OrdinalIgnoreCase)))
+        if (_selectedGame is null && !string.IsNullOrEmpty(status.SelectedGameId) && !string.Equals(status.SelectedGameId, "auto", StringComparison.OrdinalIgnoreCase))
         {
-            _selectedGame = current;
-            Raise(nameof(SelectedGame));
+            var current = AvailableGames.FirstOrDefault(g => g.Id.Equals(status.SelectedGameId, StringComparison.OrdinalIgnoreCase));
+            if (current is not null)
+            {
+                _selectedGame = current;
+                Raise(nameof(SelectedGame));
+                Raise(nameof(GameText));
+            }
         }
 
         RelayName = status.RelayName;

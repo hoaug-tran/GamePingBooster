@@ -509,19 +509,15 @@ internal sealed class TunnelEngine : IAsyncDisposable
                 _log($"Could not reload the profile ({ex.Message}) - continuing with the one already loaded.");
             }
 
-            _selectedGameId = string.IsNullOrWhiteSpace(gameId) ? (_selectedGameId ?? _config.DefaultGameId) : gameId;
-            var isAuto = string.IsNullOrEmpty(_selectedGameId) || _selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase);
+            _selectedGameId = string.IsNullOrWhiteSpace(gameId) ? _selectedGameId : gameId;
+            if (string.IsNullOrWhiteSpace(_selectedGameId) || _selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("No game selected. Please select a game before connecting.");
+            }
+
+            _game = FindGame(_selectedGameId);
 
             var runningProc = FindRunningGameProcess();
-            if (runningProc is not null)
-            {
-                var matched = FindGameForProcess(runningProc);
-                _game = matched ?? (isAuto ? null : FindGame(_selectedGameId));
-            }
-            else
-            {
-                _game = isAuto ? null : FindGame(_selectedGameId);
-            }
 
             var psk = System.Text.Encoding.UTF8.GetBytes(_config.Psk);
 
@@ -562,22 +558,15 @@ internal sealed class TunnelEngine : IAsyncDisposable
 
             if (runningProc is not null || _config.RouteWithoutGame)
             {
-                if (_game is null && _profile?.Games.Count > 0)
-                {
-                    _game = _profile.Games[0];
-                }
-                _log($"Game process {runningProc ?? "forced"}.exe is already running - installing routes for {_game?.Name}.");
+                _log($"Game process {runningProc ?? "forced"}.exe is already running - installing routes for {_game.Name}.");
                 InstallLobbyRoutes();
                 InstallRoutes();
-                SetState(TunnelState.Connected, $"Accelerating {_game?.Name} through {_relay.Name}");
+                SetState(TunnelState.Connected, $"Accelerating {_game.Name} through {_relay.Name}");
             }
             else
             {
-                var waitingTarget = isAuto
-                    ? "Counter-Strike 2 or PUBG"
-                    : (_game?.Name ?? "the game");
-                _log($"Connected to {_relay.Name}. Waiting for game to launch... Please open {waitingTarget}.");
-                SetState(TunnelState.Connected, $"Waiting for game to launch... Please open {waitingTarget}.");
+                _log($"Connected to {_relay.Name}. Waiting for game to launch... Please open {_game.Name}.");
+                SetState(TunnelState.Connected, $"Waiting for game to launch... Please open {_game.Name}.");
             }
         }
         catch (Exception ex)
@@ -1524,15 +1513,9 @@ internal sealed class TunnelEngine : IAsyncDisposable
                     return;
                 }
 
-                var matchedGame = FindGameForProcess(processName);
-                if (matchedGame is not null && (_game != matchedGame || (_routes?.ActiveRouteCount ?? 0) == 0))
+                if (_game is null && !string.IsNullOrEmpty(_selectedGameId))
                 {
-                    if (_game is not null && _game != matchedGame && _adapter is not null)
-                    {
-                        _log($"Switching active game from {_game.Name} to {matchedGame.Name}.");
-                        _routes?.RemoveGameRoutes(_adapter.InterfaceIndex);
-                    }
-                    _game = matchedGame;
+                    _game = FindGame(_selectedGameId);
                 }
 
                 _log($"Detected {processName}.exe running - installing routes for {_game?.Name}.");
@@ -1546,14 +1529,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
                 if (_adapter is not null) _routes?.RemoveGameRoutes(_adapter.InterfaceIndex);
                 if (_tunnel is not null)
                 {
-                    var isAuto = string.IsNullOrEmpty(_selectedGameId) || _selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase);
-                    var waitingTarget = isAuto
-                        ? "Counter-Strike 2 or PUBG"
-                        : (_game?.Name ?? "the game");
-                    if (isAuto)
-                    {
-                        _game = null;
-                    }
+                    var waitingTarget = _game?.Name ?? "the game";
                     SetState(TunnelState.Connected, $"Waiting for game to launch... Please open {waitingTarget}.");
                 }
             }
@@ -1598,19 +1574,19 @@ internal sealed class TunnelEngine : IAsyncDisposable
     private IEnumerable<string> GetAllProcessNames()
     {
         if (_profile is null || _profile.Games.Count == 0) return [];
-        if (!string.IsNullOrEmpty(_selectedGameId) && !_selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(_selectedGameId))
         {
             var specific = _profile.Games.FirstOrDefault(g => g.Id.Equals(_selectedGameId, StringComparison.OrdinalIgnoreCase));
             if (specific is not null) return specific.ProcessNames;
         }
-        return _profile.Games.SelectMany(g => g.ProcessNames).Distinct(StringComparer.OrdinalIgnoreCase);
+        return _game is not null ? _game.ProcessNames : [];
     }
 
     private GameEntry? FindGameForProcess(string? processName)
     {
         if (_profile is null || string.IsNullOrWhiteSpace(processName)) return _game;
 
-        if (!string.IsNullOrEmpty(_selectedGameId) && !_selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(_selectedGameId))
         {
             return _profile.Games.FirstOrDefault(g => g.Id.Equals(_selectedGameId, StringComparison.OrdinalIgnoreCase)) ?? _game;
         }
@@ -1625,24 +1601,20 @@ internal sealed class TunnelEngine : IAsyncDisposable
 
     public void SetSelectedGame(string? gameId)
     {
-        _selectedGameId = string.IsNullOrWhiteSpace(gameId) ? "auto" : gameId;
+        if (string.IsNullOrWhiteSpace(gameId) || gameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _selectedGameId = gameId;
         _log($"Selected game changed to: {_selectedGameId}");
 
         if (_profile is not null)
         {
-            var isAuto = _selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase);
-            if (!isAuto)
+            var specific = _profile.Games.FirstOrDefault(g => g.Id.Equals(_selectedGameId, StringComparison.OrdinalIgnoreCase));
+            if (specific is not null)
             {
-                var specific = _profile.Games.FirstOrDefault(g => g.Id.Equals(_selectedGameId, StringComparison.OrdinalIgnoreCase));
-                if (specific is not null)
-                {
-                    _game = specific;
-                }
-            }
-            else
-            {
-                var running = FindRunningGameProcess();
-                _game = running is not null ? FindGameForProcess(running) : null;
+                _game = specific;
             }
 
             if (_watcher is not null)
@@ -1659,9 +1631,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
                     _routes?.RemoveGameRoutes(_adapter.InterfaceIndex);
                     if (_tunnel is not null)
                     {
-                        var waitingTarget = isAuto
-                            ? "Counter-Strike 2 or PUBG"
-                            : (_game?.Name ?? "the game");
+                        var waitingTarget = _game?.Name ?? "the game";
                         SetState(TunnelState.Connected, $"Waiting for game to launch... Please open {waitingTarget}.");
                     }
                 }
@@ -1911,9 +1881,9 @@ internal sealed class TunnelEngine : IAsyncDisposable
             GameRegionName = _path?.RegionName,
             LossRatio = _tunnel?.LossRatio,
             GameRunning = isRunning,
-            GameName = currentGameName,
+            GameName = _game?.Name,
             AvailableGames = _profile?.Games.Select(g => new GameInfoItem { Id = g.Id, Name = g.Name }).ToList() ?? [],
-            SelectedGameId = _selectedGameId ?? "auto",
+            SelectedGameId = _selectedGameId,
             ActiveRoutes = _routes?.ActiveRouteCount ?? 0,
             PacketsSent = _tunnel?.PacketsSent ?? 0,
             PacketsReceived = _tunnel?.PacketsReceived ?? 0,
@@ -2119,21 +2089,20 @@ internal sealed class TunnelEngine : IAsyncDisposable
         StatusChanged?.Invoke(Snapshot());
     }
 
-    private GameEntry? FindGame(string? id)
+    private GameEntry FindGame(string? id)
     {
         if (_profile is null || _profile.Games.Count == 0)
             throw new InvalidOperationException("The profile declares no games.");
 
         if (string.IsNullOrWhiteSpace(id) || id.Equals("auto", StringComparison.OrdinalIgnoreCase))
         {
-            return _profile.Games[0];
+            throw new InvalidOperationException("No game selected. Please select a game before connecting.");
         }
 
         var found = _profile.Games.FirstOrDefault(g => g.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
         if (found is not null) return found;
 
-        _log($"Game '{id}' not found in profile - falling back to {_profile.Games[0].Name}.");
-        return _profile.Games[0];
+        throw new InvalidOperationException($"Game '{id}' not found in profile.");
     }
 
     private RelayEntry FindRelay(string? id)

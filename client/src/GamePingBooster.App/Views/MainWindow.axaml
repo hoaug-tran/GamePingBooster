@@ -46,6 +46,11 @@
       <Setter Property="Background" Value="#111111" />
       <Setter Property="BorderBrush" Value="#242424" />
     </Style>
+    <!-- The update line: the one menu item that should catch the eye. -->
+    <Style Selector="MenuItem.update">
+      <Setter Property="Foreground" Value="#60A5FA" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
   </views:SurfaceWindow.Styles>
 
   <Grid RowDefinitions="Auto,*">
@@ -61,15 +66,16 @@
 
     <!-- Header -->
     <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-      <!-- Game selector: Auto-detect or specific game -->
+      <!-- Game selector -->
       <ComboBox Grid.Column="0"
                 ItemsSource="{Binding AvailableGames}"
                 SelectedItem="{Binding SelectedGame}"
+                PlaceholderText="Select your game"
                 HorizontalAlignment="Left" VerticalAlignment="Center"
                 MinWidth="180" MaxWidth="280" Height="36"
                 Background="#242424" Foreground="#E0E0E0"
                 BorderThickness="0" CornerRadius="8"
-                ToolTip.Tip="Select game profile or Auto-detect">
+                ToolTip.Tip="Select your game">
         <ComboBox.ItemTemplate>
           <DataTemplate x:DataType="vm:GameOptionItem">
             <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
@@ -96,6 +102,10 @@
             <Separator Background="#242424" />
             <MenuItem Header="Open logs folder" Click="OnLogsClick" />
             <MenuItem Header="About" Click="OnAboutClick" />
+            <!-- Only there when UpdateChecker has found a newer release. -->
+            <Separator Background="#242424" IsVisible="{Binding HasUpdate}" />
+            <MenuItem Classes="update" Header="{Binding UpdateMenuText}" Click="OnUpdateClick"
+                      IsVisible="{Binding HasUpdate}" />
           </MenuFlyout>
         </Button.Flyout>
       </Button>

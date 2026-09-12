@@ -63,8 +63,8 @@ public sealed class ServiceConfig
     [JsonIgnore]
     public bool HasKey => !string.IsNullOrWhiteSpace(Psk);
 
-    /// <summary>Default game id, or "auto" to auto-detect whichever game is running.</summary>
-    [JsonPropertyName("defaultGameId")] public string DefaultGameId { get; set; } = "auto";
+    /// <summary>Optional default game id.</summary>
+    [JsonPropertyName("defaultGameId")] public string? DefaultGameId { get; set; }
 
     /// <summary>Virtual adapter name as shown in Network Connections.</summary>
     [JsonPropertyName("adapterName")] public string AdapterName { get; set; } = "Game Ping Booster";
