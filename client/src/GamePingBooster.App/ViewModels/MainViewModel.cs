@@ -296,6 +296,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             if (Set(ref _selectedGame, value) && value is not null)
             {
+                Raise(nameof(GameText));
                 _ = _pipe.SelectGameAsync(value.Id);
             }
         }
@@ -404,9 +405,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public string RelayText => RelayName ?? "-";
     public string RouteText => ActiveRoutes > 0 ? $"{ActiveRoutes} ranges" : "-";
 
-    public string GameText => GameName is null
-        ? "-"
-        : GameRunning ? $"{GameName} is running" : $"{GameName} is not open";
+    public string GameText
+    {
+        get
+        {
+            var isAuto = SelectedGame is null || string.Equals(SelectedGame.Id, "auto", StringComparison.OrdinalIgnoreCase);
+            if (isAuto)
+            {
+                return GameRunning ? $"{GameName} is running" : "Waiting for game to start...";
+            }
+            return GameName is null
+                ? "-"
+                : GameRunning ? $"{GameName} is running" : $"{GameName} is not open";
+        }
+    }
 
     /// <summary>
     /// Packet counters. Not cosmetic: when the tunnel connects but traffic does not flow, the
