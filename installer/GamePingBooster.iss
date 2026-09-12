@@ -105,8 +105,7 @@ Source: "{#Root}\client\native\wintun\wintun.dll"; DestDir: "{app}"; Flags: igno
 ; The profile is content: the game's address ranges. It is read relative to the install
 ; directory, which is why ServiceConfig's profilePath default is a relative path and why nothing
 ; here writes an absolute one - an absolute path only works on the machine it was written on.
-Source: "{#Root}\profiles\pubg-vn.json"; DestDir: "{app}\profiles"; Flags: ignoreversion
-Source: "{#Root}\profiles\cs2-vn.example.json"; DestDir: "{app}\profiles"; Flags: ignoreversion
+Source: "{#Root}\profiles\*.json"; DestDir: "{app}\profiles"; Flags: ignoreversion
 
 [Dirs]
 ; The service writes its configuration and logs here, as LocalSystem. Nothing is placed in it at

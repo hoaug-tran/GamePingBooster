@@ -22,6 +22,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _pipe = pipe;
         _pipe.StatusReceived += OnStatus;
         _pipe.Disconnected += OnDisconnected;
+        _selectedGame = AvailableGames[0];
     }
 
     // ------------------------------------------------------------ licence
@@ -173,6 +174,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             Raise(nameof(ActionButtonText));
             Raise(nameof(IsBusy));
             Raise(nameof(CanPressAction));
+            Raise(nameof(GameText));
         }
     }
 
@@ -285,7 +287,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     public ObservableCollection<GameOptionItem> AvailableGames { get; } = [
-        new GameOptionItem("auto", "Auto-detect")
+        new GameOptionItem("auto", "Auto-detect"),
+        new GameOptionItem("cs2", "Counter-Strike 2"),
+        new GameOptionItem("pubg", "PUBG: BATTLEGROUNDS")
     ];
 
     private GameOptionItem? _selectedGame;
@@ -412,11 +416,24 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var isAuto = SelectedGame is null || string.Equals(SelectedGame.Id, "auto", StringComparison.OrdinalIgnoreCase);
             if (isAuto)
             {
-                return GameRunning ? $"{GameName} is running" : "Waiting for game to start...";
+                if (GameRunning && !string.IsNullOrEmpty(GameName))
+                {
+                    return $"{GameName} is running";
+                }
+                return State == TunnelState.Connected
+                    ? "Waiting for game to launch..."
+                    : "No game running";
             }
-            return GameName is null
-                ? "-"
-                : GameRunning ? $"{GameName} is running" : $"{GameName} is not open";
+
+            var targetName = SelectedGame?.DisplayName ?? "Game";
+            if (GameRunning && (string.IsNullOrEmpty(GameName) || string.Equals(GameName, targetName, StringComparison.OrdinalIgnoreCase)))
+            {
+                return $"{targetName} is running";
+            }
+
+            return State == TunnelState.Connected
+                ? $"Waiting for {targetName} to launch..."
+                : $"{targetName} is not open";
         }
     }
 
