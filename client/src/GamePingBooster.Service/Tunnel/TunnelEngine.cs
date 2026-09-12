@@ -246,74 +246,226 @@ internal sealed class TunnelEngine : IAsyncDisposable
     ///                                been pushed yet, so a fresh install still connects.
     ///   self-hosted               -> the local file, exactly as before. Nothing pushes.
     /// </summary>
-    public async Task LoadProfileAsync(CancellationToken ct)
+    private List<string> ResolveProfileFiles()
     {
-        // "Licensed" is having a licence server, full stop. There is no separate profile
-        // address to configure: the endpoints all hang off the one URL somebody typed, and
-        // asking for a second address for the same server was needless.
-        var licensed = !string.IsNullOrWhiteSpace(_config.LicenceUrl);
-
-        // Where the installer puts it, and what the default in ServiceConfig resolves to.
-        var shipped = Path.Combine(AppContext.BaseDirectory, "profiles", "pubg-vn.json");
-
-        var local = Path.IsPathRooted(_config.ProfilePath)
-            ? _config.ProfilePath
-            : Path.Combine(AppContext.BaseDirectory, _config.ProfilePath);
-
-        // A configured path that no longer exists is not a dead end. It usually means an
-        // absolute path written by hand on a developer's machine, or an install that moved -
-        // and in both cases the profile the installer shipped is sitting right there.
-        if (!File.Exists(local) && File.Exists(shipped))
+        var candidates = new List<string>();
+        if (_config.ProfilePaths is { Count: > 0 })
         {
-            _log($"No profile at {local}; falling back to the one installed at {shipped}.");
-            local = shipped;
+            candidates.AddRange(_config.ProfilePaths);
+        }
+        if (!string.IsNullOrWhiteSpace(_config.ProfilePath))
+        {
+            candidates.Add(_config.ProfilePath);
         }
 
-        var sealedExists = File.Exists(SealedProfilePath);
-        string source;
-        string json;
+        candidates.Add("profiles");
+        candidates.Add(Path.Combine(AppContext.BaseDirectory, "profiles"));
 
-        if ((licensed || !File.Exists(local)) && sealedExists)
+        var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var rawPath in candidates)
         {
-            // Opened in memory. The plaintext exists only for as long as it takes to parse.
+            if (string.IsNullOrWhiteSpace(rawPath)) continue;
+
+            string? path = null;
+            if (Path.IsPathRooted(rawPath))
+            {
+                if (File.Exists(rawPath) || Directory.Exists(rawPath)) path = rawPath;
+            }
+            else
+            {
+                var candidate1 = Path.Combine(AppContext.BaseDirectory, rawPath);
+                if (File.Exists(candidate1) || Directory.Exists(candidate1))
+                {
+                    path = candidate1;
+                }
+                else
+                {
+                    var candidate2 = Path.Combine(Directory.GetCurrentDirectory(), rawPath);
+                    if (File.Exists(candidate2) || Directory.Exists(candidate2))
+                    {
+                        path = candidate2;
+                    }
+                    else
+                    {
+                        var candidate3 = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", rawPath));
+                        if (File.Exists(candidate3) || Directory.Exists(candidate3))
+                        {
+                            path = candidate3;
+                        }
+                    }
+                }
+            }
+
+            if (path is null) continue;
+
+            if (File.Exists(path))
+            {
+                files.Add(Path.GetFullPath(path));
+            }
+            else if (Directory.Exists(path))
+            {
+                try
+                {
+                    var dirFiles = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly);
+                    var realFiles = new HashSet<string>(
+                        dirFiles.Where(f => !f.EndsWith(".example.json", StringComparison.OrdinalIgnoreCase))
+                                .Select(f => Path.GetFileNameWithoutExtension(f)),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    foreach (var f in dirFiles)
+                    {
+                        var fileName = Path.GetFileName(f);
+                        if (fileName.EndsWith(".example.json", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var baseName = fileName.Substring(0, fileName.Length - ".example.json".Length);
+                            if (realFiles.Contains(baseName))
+                            {
+                                continue;
+                            }
+                        }
+                        files.Add(Path.GetFullPath(f));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _log($"Warning: could not scan profile directory {path}: {ex.Message}");
+                }
+            }
+        }
+
+        return files.ToList();
+    }
+
+    public async Task LoadProfileAsync(CancellationToken ct)
+    {
+        var licensed = !string.IsNullOrWhiteSpace(_config.LicenceUrl);
+        var sealedExists = File.Exists(SealedProfilePath);
+        var profileFiles = ResolveProfileFiles();
+
+        string source;
+        ProfileBundle? profile = null;
+        var sourceDescription = "";
+
+        if ((licensed || profileFiles.Count == 0) && sealedExists)
+        {
             var envelope = await File.ReadAllBytesAsync(SealedProfilePath, ct).ConfigureAwait(false);
             var plaintext = _device.OpenSealedProfile(envelope);
             try
             {
-                json = System.Text.Encoding.UTF8.GetString(plaintext);
+                var json = System.Text.Encoding.UTF8.GetString(plaintext);
+                profile = JsonSerializer.Deserialize(json, ProfileJsonContext.Default.ProfileBundle);
             }
             finally
             {
                 CryptographicOperations.ZeroMemory(plaintext);
             }
             source = licensed ? "pushed" : "cached";
+            sourceDescription = SealedProfilePath;
         }
-        else if (File.Exists(local))
+        else if (profileFiles.Count > 0)
         {
-            json = await File.ReadAllTextAsync(local, ct).ConfigureAwait(false);
-            source = "shipped";
+            ProfileBundle? combined = null;
+            var loadedFiles = new List<string>();
+
+            foreach (var file in profileFiles)
+            {
+                try
+                {
+                    var json = await File.ReadAllTextAsync(file, ct).ConfigureAwait(false);
+                    var bundle = JsonSerializer.Deserialize(json, ProfileJsonContext.Default.ProfileBundle);
+                    if (bundle is null || bundle.Games.Count == 0) continue;
+
+                    if (combined is null)
+                    {
+                        combined = bundle;
+                    }
+                    else
+                    {
+                        foreach (var g in bundle.Games)
+                        {
+                            var existingGame = combined.Games.FirstOrDefault(x => string.Equals(x.Id, g.Id, StringComparison.OrdinalIgnoreCase));
+                            if (existingGame is null)
+                            {
+                                combined.Games.Add(g);
+                            }
+                            else
+                            {
+                                foreach (var reg in g.Regions)
+                                {
+                                    if (!existingGame.Regions.Any(r => string.Equals(r.Id, reg.Id, StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        existingGame.Regions.Add(reg);
+                                    }
+                                }
+                                foreach (var proc in g.ProcessNames)
+                                {
+                                    if (!existingGame.ProcessNames.Contains(proc, StringComparer.OrdinalIgnoreCase))
+                                    {
+                                        existingGame.ProcessNames.Add(proc);
+                                    }
+                                }
+                                foreach (var addr in g.LobbyAddresses)
+                                {
+                                    if (!existingGame.LobbyAddresses.Contains(addr, StringComparer.OrdinalIgnoreCase))
+                                    {
+                                        existingGame.LobbyAddresses.Add(addr);
+                                    }
+                                }
+                            }
+                        }
+
+                        foreach (var r in bundle.Relays)
+                        {
+                            if (!combined.Relays.Any(x => string.Equals(x.Id, r.Id, StringComparison.OrdinalIgnoreCase) ||
+                                                          string.Equals(x.Endpoint, r.Endpoint, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                combined.Relays.Add(r);
+                            }
+                        }
+
+                        if (bundle.GeneratedUtc > combined.GeneratedUtc)
+                        {
+                            combined.GeneratedUtc = bundle.GeneratedUtc;
+                        }
+                    }
+                    loadedFiles.Add(Path.GetFileName(file));
+                }
+                catch (Exception ex)
+                {
+                    _log($"Warning: could not read profile file {file}: {ex.Message}");
+                }
+            }
+
+            if (combined is not null && combined.Games.Count > 0)
+            {
+                profile = combined;
+                source = "shipped";
+                sourceDescription = string.Join(", ", loadedFiles);
+            }
+            else
+            {
+                throw new FileNotFoundException(
+                    $"No valid profiles found at {_config.ProfilePath} or in profiles directory, and nothing from the licence server either.");
+            }
         }
         else
         {
             throw new FileNotFoundException(
-                $"No profile at {_config.ProfilePath} and nothing from the licence server either.");
+                $"No profiles found at {_config.ProfilePath} and nothing from the licence server either.");
         }
 
-        _profile = JsonSerializer.Deserialize(json, ProfileJsonContext.Default.ProfileBundle)
-                   ?? throw new InvalidOperationException("The profile is not valid.");
+        _profile = profile ?? throw new InvalidOperationException("The profile is not valid.");
         _profileSource = source;
-        var chosen = source == "shipped" ? local : SealedProfilePath;
 
         if (licensed && source != "pushed")
         {
-            // Loud, because it is the silent failure this whole path exists to avoid: the tunnel
-            // will work perfectly on ranges that may be months old.
-            _log($"Loaded the {source} profile from {chosen}. A licence server is configured but " +
-                 "nothing has been pushed yet - sign in so the app can fetch the current one.");
+            _log($"Loaded {source} profile from {sourceDescription} ({_profile.Games.Count} game(s): {string.Join(", ", _profile.Games.Select(g => g.Name))}). " +
+                 "A licence server is configured but nothing has been pushed yet - sign in so the app can fetch the current one.");
         }
         else
         {
-            _log($"Loaded the {source} profile from {chosen}");
+            _log($"Loaded {source} profile from {sourceDescription} ({_profile.Games.Count} game(s): {string.Join(", ", _profile.Games.Select(g => g.Name))}, {_profile.Relays.Count} relay(s))");
         }
         ApplySelfHostedRelay();
     }
@@ -1721,7 +1873,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
             // which the UI reads as "never" - correct on a machine that has never signed in.
             ProfileUpdatedAt = File.Exists(SealedProfilePath)
                 ? new DateTimeOffset(File.GetLastWriteTimeUtc(SealedProfilePath)).ToUnixTimeSeconds()
-                : null,
+                : (_profile?.GeneratedUtc != default ? _profile?.GeneratedUtc.ToUnixTimeSeconds() : null),
         };
     }
 
@@ -1851,7 +2003,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
         var previousRelayId = _config.DefaultRelayId;
 
         _config.RelayEndpoints = cleaned;
-        _config.Psk = psk;
+        _config.Psk = psk ?? "";
         if (licenceUrl is not null) _config.LicenceUrl = licenceUrl;
 
         // Clear the preferred relay id along with it.

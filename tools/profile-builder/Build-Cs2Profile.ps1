@@ -48,6 +48,26 @@ if (-not $ProfilePath) {
     $ProfilePath = Join-Path $PSScriptRoot '..\..\profiles\cs2-vn.example.json'
 }
 
+# Re-indent to two spaces per level matching the rest of the repository.
+function Format-Json {
+    param([string]$Json)
+    try {
+        $lines = $Json -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+        $sb = New-Object System.Text.StringBuilder
+        $depth = 0
+        foreach ($line in $lines) {
+            if ($line -match '^[\}\]]') { $depth-- }
+            $null = $sb.AppendLine(('  ' * [Math]::Max($depth, 0)) + $line)
+            if ($line -match '[\{\[]$') { $depth++ }
+        }
+        $out = $sb.ToString() -replace '\[\s*\r?\n\s*\]', '[]'
+        $null = ConvertFrom-Json -InputObject $out
+        return $out
+    } catch {
+        return $Json
+    }
+}
+
 Write-Host "Fetching latest CS2 Steam SDR configuration from Valve API..." -ForegroundColor Cyan
 $apiUrl = "https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730"
 $sdrConfig = Invoke-RestMethod -Uri $apiUrl -TimeoutSec 15
@@ -174,7 +194,7 @@ $profile = [ordered]@{
     )
 }
 
-$jsonOutput = $profile | ConvertTo-Json -Depth 20
+$jsonOutput = Format-Json ($profile | ConvertTo-Json -Depth 20)
 
 if ($DryRun) {
     Write-Host "Dry run completed: $($regions.Count) regions, $totalSubnets /24 subnets discovered." -ForegroundColor Yellow

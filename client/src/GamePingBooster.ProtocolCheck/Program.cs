@@ -1,4 +1,4 @@
-﻿using System.Buffers.Binary;
+using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -126,6 +126,15 @@ internal static class Program
             GamePingBooster.Core.Profiles.ProfileJsonContext.Default.ProfileBundle)!;
         Check("profile: a profile without lobbyAddresses gives an empty list, not null",
             old.Games[0].LobbyAddresses is { Count: 0 }, "the licence server does not send the field yet");
+
+        const string cs2Sample = """
+            {"schemaVersion":1,"games":[{"id":"cs2","name":"Counter-Strike 2","processNames":["cs2.exe"],"regions":[]}],"relays":[]}
+            """;
+        var cs2Parsed = System.Text.Json.JsonSerializer.Deserialize(cs2Sample,
+            GamePingBooster.Core.Profiles.ProfileJsonContext.Default.ProfileBundle)!;
+        Check("profile: CS2 game profile parses with processNames",
+            cs2Parsed.Games.Count == 1 && cs2Parsed.Games[0].Id == "cs2" && cs2Parsed.Games[0].ProcessNames.Contains("cs2.exe"),
+            "CS2 profile schema parsing failed");
 
         var relays = new[] { "203.0.113.10:51820" };
         var landmarks = new[] { "20.43.187.66" };

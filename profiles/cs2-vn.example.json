@@ -1,398 +1,396 @@
 ﻿{
-    "schemaVersion":  1,
-    "generatedUtc":  "2026-09-12T04:54:03Z",
-    "note":  "CS2 COMPLETE server IPs - all 41 Valve SDR POPs from Steam API (https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730). Generated 2026-09-12.",
-    "games":  [
-                  {
-                      "id":  "cs2",
-                      "name":  "Counter-Strike 2",
-                      "processNames":  [
-                                           "cs2.exe"
-                                       ],
-                      "lobbyAddresses":  [
-
-                                         ],
-                      "regions":  [
-                                      {
-                                          "id":  "cs2-sgp",
-                                          "name":  "Singapore",
-                                          "source":  "steam-sdr:sgp",
-                                          "note":  "Valve SDR SGP relay cluster.",
-                                          "cidrs":  [
-                                                        "103.10.124.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-hkg",
-                                          "name":  "Hong Kong",
-                                          "source":  "steam-sdr:hkg",
-                                          "note":  "Valve SDR HKG relay cluster.",
-                                          "cidrs":  [
-                                                        "103.28.54.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-tyo",
-                                          "name":  "Tokyo Koto City (Japan)",
-                                          "source":  "steam-sdr:tyo",
-                                          "note":  "Valve SDR TYO relay cluster.",
-                                          "cidrs":  [
-                                                        "45.121.184.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-seo",
-                                          "name":  "Seoul (South Korea)",
-                                          "source":  "steam-sdr:seo",
-                                          "note":  "Valve SDR SEO relay cluster.",
-                                          "cidrs":  [
-                                                        "146.66.152.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-bom2",
-                                          "name":  "Mumbai (India)",
-                                          "source":  "steam-sdr:bom2",
-                                          "note":  "Valve SDR BOM2 relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.224.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-maa2",
-                                          "name":  "Chennai - Ambattur (India)",
-                                          "source":  "steam-sdr:maa2",
-                                          "note":  "Valve SDR MAA2 relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.225.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-syd",
-                                          "name":  "Sydney (Australia)",
-                                          "source":  "steam-sdr:syd",
-                                          "note":  "Valve SDR SYD relay cluster.",
-                                          "cidrs":  [
-                                                        "103.10.125.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-dxb",
-                                          "name":  "Dubai (United Arab Emirates)",
-                                          "source":  "steam-sdr:dxb",
-                                          "note":  "Valve SDR DXB relay cluster.",
-                                          "cidrs":  [
-                                                        "185.25.183.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-fra",
-                                          "name":  "Frankfurt (Germany)",
-                                          "source":  "steam-sdr:fra",
-                                          "note":  "Valve SDR FRA relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.226.0/24",
-                                                        "162.254.197.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-ams",
-                                          "name":  "Amsterdam (Netherlands)",
-                                          "source":  "steam-sdr:ams",
-                                          "note":  "Valve SDR AMS relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.248.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-lhr",
-                                          "name":  "London (England)",
-                                          "source":  "steam-sdr:lhr",
-                                          "note":  "Valve SDR LHR relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.196.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-par",
-                                          "name":  "Paris (France)",
-                                          "source":  "steam-sdr:par",
-                                          "note":  "Valve SDR PAR relay cluster.",
-                                          "cidrs":  [
-                                                        "185.25.182.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-mad",
-                                          "name":  "Madrid (Spain)",
-                                          "source":  "steam-sdr:mad",
-                                          "note":  "Valve SDR MAD relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.246.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-vie",
-                                          "name":  "Vienna (Austria)",
-                                          "source":  "steam-sdr:vie",
-                                          "note":  "Valve SDR VIE relay cluster.",
-                                          "cidrs":  [
-                                                        "146.66.155.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-sto",
-                                          "name":  "Stockholm - Kista (Sweden)",
-                                          "source":  "steam-sdr:sto",
-                                          "note":  "Valve SDR STO relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.198.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-sto2",
-                                          "name":  "Stockholm - Bromma (Sweden)",
-                                          "source":  "steam-sdr:sto2",
-                                          "note":  "Valve SDR STO2 relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.252.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-waw",
-                                          "name":  "Warsaw (Poland)",
-                                          "source":  "steam-sdr:waw",
-                                          "note":  "Valve SDR WAW relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.230.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-iad",
-                                          "name":  "Sterling (Virginia)",
-                                          "source":  "steam-sdr:iad",
-                                          "note":  "Valve SDR IAD relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.192.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-ord",
-                                          "name":  "Chicago (Illinois)",
-                                          "source":  "steam-sdr:ord",
-                                          "note":  "Valve SDR ORD relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.193.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-atl",
-                                          "name":  "Atlanta (Georgia)",
-                                          "source":  "steam-sdr:atl",
-                                          "note":  "Valve SDR ATL relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.199.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-dfw",
-                                          "name":  "Dallas (Texas)",
-                                          "source":  "steam-sdr:dfw",
-                                          "note":  "Valve SDR DFW relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.194.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-lax",
-                                          "name":  "Los Angeles (California)",
-                                          "source":  "steam-sdr:lax",
-                                          "note":  "Valve SDR LAX relay cluster.",
-                                          "cidrs":  [
-                                                        "162.254.195.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-sea",
-                                          "name":  "Seattle (Washington)",
-                                          "source":  "steam-sdr:sea",
-                                          "note":  "Valve SDR SEA relay cluster.",
-                                          "cidrs":  [
-                                                        "205.196.6.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-gru",
-                                          "name":  "Sao Paulo (Brazil)",
-                                          "source":  "steam-sdr:gru",
-                                          "note":  "Valve SDR GRU relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.227.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-eze",
-                                          "name":  "Buenos Aires (Argentina)",
-                                          "source":  "steam-sdr:eze",
-                                          "note":  "Valve SDR EZE relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.255.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-scl",
-                                          "name":  "Santiago (Chile)",
-                                          "source":  "steam-sdr:scl",
-                                          "note":  "Valve SDR SCL relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.249.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-lim",
-                                          "name":  "Lima (Peru)",
-                                          "source":  "steam-sdr:lim",
-                                          "note":  "Valve SDR LIM relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.244.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-jnb",
-                                          "name":  "Johannesburg (South Africa)",
-                                          "source":  "steam-sdr:jnb",
-                                          "note":  "Valve SDR JNB relay cluster.",
-                                          "cidrs":  [
-                                                        "155.133.238.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-ctum",
-                                          "name":  "Alibaba Cloud Chengdu - Mobile (China)",
-                                          "source":  "steam-sdr:ctum",
-                                          "note":  "Valve SDR CTUM relay cluster.",
-                                          "cidrs":  [
-                                                        "112.45.45.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-ctut",
-                                          "name":  "Alibaba Cloud Chengdu - Telecom (China)",
-                                          "source":  "steam-sdr:ctut",
-                                          "note":  "Valve SDR CTUT relay cluster.",
-                                          "cidrs":  [
-                                                        "118.123.224.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-ctuu",
-                                          "name":  "Alibaba Cloud Chengdu - Unicom (China)",
-                                          "source":  "steam-sdr:ctuu",
-                                          "note":  "Valve SDR CTUU relay cluster.",
-                                          "cidrs":  [
-                                                        "101.206.160.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-gum",
-                                          "name":  "Guam",
-                                          "source":  "steam-sdr:gum",
-                                          "note":  "Valve SDR GUM relay cluster.",
-                                          "cidrs":  [
-                                                        "185.25.180.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-pekm",
-                                          "name":  "Alibaba Cloud Beijing - Mobile (China)",
-                                          "source":  "steam-sdr:pekm",
-                                          "note":  "Valve SDR PEKM relay cluster.",
-                                          "cidrs":  [
-                                                        "39.156.182.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-pekt",
-                                          "name":  "Alibaba Cloud Beijing - Telecom (China)",
-                                          "source":  "steam-sdr:pekt",
-                                          "note":  "Valve SDR PEKT relay cluster.",
-                                          "cidrs":  [
-                                                        "114.113.213.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-peku",
-                                          "name":  "Alibaba Cloud Beijing - Unicom (China)",
-                                          "source":  "steam-sdr:peku",
-                                          "note":  "Valve SDR PEKU relay cluster.",
-                                          "cidrs":  [
-                                                        "111.206.90.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-pvgm",
-                                          "name":  "Alibaba Cloud Shanghai - Mobile (China)",
-                                          "source":  "steam-sdr:pvgm",
-                                          "note":  "Valve SDR PVGM relay cluster.",
-                                          "cidrs":  [
-                                                        "117.185.19.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-pvgt",
-                                          "name":  "Alibaba Cloud Shanghai - Telecom (China)",
-                                          "source":  "steam-sdr:pvgt",
-                                          "note":  "Valve SDR PVGT relay cluster.",
-                                          "cidrs":  [
-                                                        "61.152.104.0/24",
-                                                        "180.163.126.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-pvgu",
-                                          "name":  "Alibaba Cloud Shanghai - Unicom (China)",
-                                          "source":  "steam-sdr:pvgu",
-                                          "note":  "Valve SDR PVGU relay cluster.",
-                                          "cidrs":  [
-                                                        "140.206.227.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-tgdm",
-                                          "name":  "Tencent Guangzhou - Mobile (China)",
-                                          "source":  "steam-sdr:tgdm",
-                                          "note":  "Valve SDR TGDM relay cluster.",
-                                          "cidrs":  [
-                                                        "120.233.106.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-tgdt",
-                                          "name":  "Tencent Guangzhou - Telecom (China)",
-                                          "source":  "steam-sdr:tgdt",
-                                          "note":  "Valve SDR TGDT relay cluster.",
-                                          "cidrs":  [
-                                                        "183.60.122.0/24"
-                                                    ]
-                                      },
-                                      {
-                                          "id":  "cs2-tgdu",
-                                          "name":  "Tencent Guangzhou - Unicom (China)",
-                                          "source":  "steam-sdr:tgdu",
-                                          "note":  "Valve SDR TGDU relay cluster.",
-                                          "cidrs":  [
-                                                        "58.254.163.0/24"
-                                                    ]
-                                      }
-                                  ]
-                  }
-              ],
-    "relays":  [
-                   {
-                       "id":  "relay-1",
-                       "name":  "Your relay",
-                       "location":  "Singapore",
-                       "endpoint":  "203.0.113.10:51820"
-                   }
-               ]
+  "schemaVersion":  1,
+  "generatedUtc":  "2026-09-12T05:09:32Z",
+  "note":  "CS2 COMPLETE server IPs - all 41 Valve SDR POPs from Steam API (https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730). Generated 2026-09-12.",
+  "games":  [
+    {
+      "id":  "cs2",
+      "name":  "Counter-Strike 2",
+      "processNames":  [
+        "cs2.exe"
+      ],
+      "lobbyAddresses":  [],
+      "regions":  [
+        {
+          "id":  "cs2-sgp",
+          "name":  "Singapore",
+          "source":  "steam-sdr:sgp",
+          "note":  "Valve SDR SGP relay cluster.",
+          "cidrs":  [
+            "103.10.124.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-hkg",
+          "name":  "Hong Kong",
+          "source":  "steam-sdr:hkg",
+          "note":  "Valve SDR HKG relay cluster.",
+          "cidrs":  [
+            "103.28.54.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-tyo",
+          "name":  "Tokyo Koto City (Japan)",
+          "source":  "steam-sdr:tyo",
+          "note":  "Valve SDR TYO relay cluster.",
+          "cidrs":  [
+            "45.121.184.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-seo",
+          "name":  "Seoul (South Korea)",
+          "source":  "steam-sdr:seo",
+          "note":  "Valve SDR SEO relay cluster.",
+          "cidrs":  [
+            "146.66.152.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-bom2",
+          "name":  "Mumbai (India)",
+          "source":  "steam-sdr:bom2",
+          "note":  "Valve SDR BOM2 relay cluster.",
+          "cidrs":  [
+            "155.133.224.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-maa2",
+          "name":  "Chennai - Ambattur (India)",
+          "source":  "steam-sdr:maa2",
+          "note":  "Valve SDR MAA2 relay cluster.",
+          "cidrs":  [
+            "155.133.225.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-syd",
+          "name":  "Sydney (Australia)",
+          "source":  "steam-sdr:syd",
+          "note":  "Valve SDR SYD relay cluster.",
+          "cidrs":  [
+            "103.10.125.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-dxb",
+          "name":  "Dubai (United Arab Emirates)",
+          "source":  "steam-sdr:dxb",
+          "note":  "Valve SDR DXB relay cluster.",
+          "cidrs":  [
+            "185.25.183.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-fra",
+          "name":  "Frankfurt (Germany)",
+          "source":  "steam-sdr:fra",
+          "note":  "Valve SDR FRA relay cluster.",
+          "cidrs":  [
+            "155.133.226.0/24",
+            "162.254.197.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-ams",
+          "name":  "Amsterdam (Netherlands)",
+          "source":  "steam-sdr:ams",
+          "note":  "Valve SDR AMS relay cluster.",
+          "cidrs":  [
+            "155.133.248.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-lhr",
+          "name":  "London (England)",
+          "source":  "steam-sdr:lhr",
+          "note":  "Valve SDR LHR relay cluster.",
+          "cidrs":  [
+            "162.254.196.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-par",
+          "name":  "Paris (France)",
+          "source":  "steam-sdr:par",
+          "note":  "Valve SDR PAR relay cluster.",
+          "cidrs":  [
+            "185.25.182.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-mad",
+          "name":  "Madrid (Spain)",
+          "source":  "steam-sdr:mad",
+          "note":  "Valve SDR MAD relay cluster.",
+          "cidrs":  [
+            "155.133.246.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-vie",
+          "name":  "Vienna (Austria)",
+          "source":  "steam-sdr:vie",
+          "note":  "Valve SDR VIE relay cluster.",
+          "cidrs":  [
+            "146.66.155.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-sto",
+          "name":  "Stockholm - Kista (Sweden)",
+          "source":  "steam-sdr:sto",
+          "note":  "Valve SDR STO relay cluster.",
+          "cidrs":  [
+            "162.254.198.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-sto2",
+          "name":  "Stockholm - Bromma (Sweden)",
+          "source":  "steam-sdr:sto2",
+          "note":  "Valve SDR STO2 relay cluster.",
+          "cidrs":  [
+            "155.133.252.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-waw",
+          "name":  "Warsaw (Poland)",
+          "source":  "steam-sdr:waw",
+          "note":  "Valve SDR WAW relay cluster.",
+          "cidrs":  [
+            "155.133.230.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-iad",
+          "name":  "Sterling (Virginia)",
+          "source":  "steam-sdr:iad",
+          "note":  "Valve SDR IAD relay cluster.",
+          "cidrs":  [
+            "162.254.192.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-ord",
+          "name":  "Chicago (Illinois)",
+          "source":  "steam-sdr:ord",
+          "note":  "Valve SDR ORD relay cluster.",
+          "cidrs":  [
+            "162.254.193.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-atl",
+          "name":  "Atlanta (Georgia)",
+          "source":  "steam-sdr:atl",
+          "note":  "Valve SDR ATL relay cluster.",
+          "cidrs":  [
+            "162.254.199.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-dfw",
+          "name":  "Dallas (Texas)",
+          "source":  "steam-sdr:dfw",
+          "note":  "Valve SDR DFW relay cluster.",
+          "cidrs":  [
+            "162.254.194.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-lax",
+          "name":  "Los Angeles (California)",
+          "source":  "steam-sdr:lax",
+          "note":  "Valve SDR LAX relay cluster.",
+          "cidrs":  [
+            "162.254.195.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-sea",
+          "name":  "Seattle (Washington)",
+          "source":  "steam-sdr:sea",
+          "note":  "Valve SDR SEA relay cluster.",
+          "cidrs":  [
+            "205.196.6.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-gru",
+          "name":  "Sao Paulo (Brazil)",
+          "source":  "steam-sdr:gru",
+          "note":  "Valve SDR GRU relay cluster.",
+          "cidrs":  [
+            "155.133.227.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-eze",
+          "name":  "Buenos Aires (Argentina)",
+          "source":  "steam-sdr:eze",
+          "note":  "Valve SDR EZE relay cluster.",
+          "cidrs":  [
+            "155.133.255.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-scl",
+          "name":  "Santiago (Chile)",
+          "source":  "steam-sdr:scl",
+          "note":  "Valve SDR SCL relay cluster.",
+          "cidrs":  [
+            "155.133.249.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-lim",
+          "name":  "Lima (Peru)",
+          "source":  "steam-sdr:lim",
+          "note":  "Valve SDR LIM relay cluster.",
+          "cidrs":  [
+            "155.133.244.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-jnb",
+          "name":  "Johannesburg (South Africa)",
+          "source":  "steam-sdr:jnb",
+          "note":  "Valve SDR JNB relay cluster.",
+          "cidrs":  [
+            "155.133.238.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-ctum",
+          "name":  "Alibaba Cloud Chengdu - Mobile (China)",
+          "source":  "steam-sdr:ctum",
+          "note":  "Valve SDR CTUM relay cluster.",
+          "cidrs":  [
+            "112.45.45.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-ctut",
+          "name":  "Alibaba Cloud Chengdu - Telecom (China)",
+          "source":  "steam-sdr:ctut",
+          "note":  "Valve SDR CTUT relay cluster.",
+          "cidrs":  [
+            "118.123.224.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-ctuu",
+          "name":  "Alibaba Cloud Chengdu - Unicom (China)",
+          "source":  "steam-sdr:ctuu",
+          "note":  "Valve SDR CTUU relay cluster.",
+          "cidrs":  [
+            "101.206.160.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-gum",
+          "name":  "Guam",
+          "source":  "steam-sdr:gum",
+          "note":  "Valve SDR GUM relay cluster.",
+          "cidrs":  [
+            "185.25.180.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-pekm",
+          "name":  "Alibaba Cloud Beijing - Mobile (China)",
+          "source":  "steam-sdr:pekm",
+          "note":  "Valve SDR PEKM relay cluster.",
+          "cidrs":  [
+            "39.156.182.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-pekt",
+          "name":  "Alibaba Cloud Beijing - Telecom (China)",
+          "source":  "steam-sdr:pekt",
+          "note":  "Valve SDR PEKT relay cluster.",
+          "cidrs":  [
+            "114.113.213.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-peku",
+          "name":  "Alibaba Cloud Beijing - Unicom (China)",
+          "source":  "steam-sdr:peku",
+          "note":  "Valve SDR PEKU relay cluster.",
+          "cidrs":  [
+            "111.206.90.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-pvgm",
+          "name":  "Alibaba Cloud Shanghai - Mobile (China)",
+          "source":  "steam-sdr:pvgm",
+          "note":  "Valve SDR PVGM relay cluster.",
+          "cidrs":  [
+            "117.185.19.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-pvgt",
+          "name":  "Alibaba Cloud Shanghai - Telecom (China)",
+          "source":  "steam-sdr:pvgt",
+          "note":  "Valve SDR PVGT relay cluster.",
+          "cidrs":  [
+            "61.152.104.0/24",
+            "180.163.126.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-pvgu",
+          "name":  "Alibaba Cloud Shanghai - Unicom (China)",
+          "source":  "steam-sdr:pvgu",
+          "note":  "Valve SDR PVGU relay cluster.",
+          "cidrs":  [
+            "140.206.227.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-tgdm",
+          "name":  "Tencent Guangzhou - Mobile (China)",
+          "source":  "steam-sdr:tgdm",
+          "note":  "Valve SDR TGDM relay cluster.",
+          "cidrs":  [
+            "120.233.106.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-tgdt",
+          "name":  "Tencent Guangzhou - Telecom (China)",
+          "source":  "steam-sdr:tgdt",
+          "note":  "Valve SDR TGDT relay cluster.",
+          "cidrs":  [
+            "183.60.122.0/24"
+          ]
+        },
+        {
+          "id":  "cs2-tgdu",
+          "name":  "Tencent Guangzhou - Unicom (China)",
+          "source":  "steam-sdr:tgdu",
+          "note":  "Valve SDR TGDU relay cluster.",
+          "cidrs":  [
+            "58.254.163.0/24"
+          ]
+        }
+      ]
+    }
+  ],
+  "relays":  [
+    {
+      "id":  "relay-1",
+      "name":  "Your relay",
+      "location":  "Singapore",
+      "endpoint":  "203.0.113.10:51820"
+    }
+  ]
 }
