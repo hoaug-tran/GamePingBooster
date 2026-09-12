@@ -52,9 +52,10 @@ if (-not (Test-Path $progData)) {
 
 Write-Host "3. Updating configuration in '$progData'..." -ForegroundColor Cyan
 $cfgFile = Join-Path $progData "config.json"
-$existingPsk = "xNQAPOr3Zi2rjc6cQrxa5Atu6q23Mik4JkOk8/st9Wo="
-$existingRelays = @("74.81.54.201:51820")
+$existingPsk = ""
+$existingRelays = @()
 
+# 1. Read existing config from ProgramData
 if (Test-Path $cfgFile) {
     try {
         $raw = Get-Content $cfgFile -Raw | ConvertFrom-Json
@@ -63,6 +64,46 @@ if (Test-Path $cfgFile) {
             $existingRelays = @($raw.relayEndpoints)
         }
     } catch {}
+}
+
+# 2. Check local client/config.json if needed
+$localClientCfg = Join-Path $repoRoot "client\config.json"
+if ((-not $existingPsk -or $existingRelays.Count -eq 0) -and (Test-Path $localClientCfg)) {
+    try {
+        $raw = Get-Content $localClientCfg -Raw | ConvertFrom-Json
+        if (-not $existingPsk -and $raw.psk) { $existingPsk = $raw.psk }
+        if ($existingRelays.Count -eq 0 -and $raw.relayEndpoints) {
+            $existingRelays = @($raw.relayEndpoints)
+        }
+    } catch {}
+}
+
+# 3. Check .env if present
+$envFile = Join-Path $repoRoot ".env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -match '^GPB_PSK=(.*)$') {
+            if (-not $existingPsk) { $existingPsk = $Matches[1].Trim('"', "'", ' ') }
+        }
+        if ($line -match '^GPB_RELAY_ENDPOINT=(.*)$') {
+            if ($existingRelays.Count -eq 0) { $existingRelays = @($Matches[1].Trim('"', "'", ' ')) }
+        }
+    }
+}
+
+# 4. Check gpb.conf if relay is still empty
+$gpbConfFile = Join-Path $repoRoot "gpb.conf"
+if ($existingRelays.Count -eq 0 -and (Test-Path $gpbConfFile)) {
+    . (Join-Path $repoRoot 'tools\GpbConf.ps1')
+    $conf = Read-GpbConf $gpbConfFile
+    $default = $conf['RELAY_DEFAULT']
+    if ($default) {
+        $r = Get-GpbRelay -Name $default -RepoRoot $repoRoot
+        if ($r -and $r.Endpoint) {
+            $existingRelays = @($r.Endpoint)
+        }
+    }
 }
 
 $newConfig = [ordered]@{

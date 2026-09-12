@@ -32,7 +32,7 @@
     .\Build-Cs2Profile.ps1
 
 .EXAMPLE
-    .\Build-Cs2Profile.ps1 -ProfilePath ..\..\profiles\cs2-vn.json -RelayEndpoint "74.81.54.201:51820"
+    .\Build-Cs2Profile.ps1 -ProfilePath ..\..\profiles\cs2-vn.json -RelayEndpoint "203.0.113.10:51820"
 #>
 
 [CmdletBinding()]
