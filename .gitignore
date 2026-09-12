@@ -60,6 +60,7 @@ docs/COMMERCIAL.md
 
 # Installer output
 installer/dist/
+dist/
 
 # Cong cu va tai lieu van hanh, khong public
 licence-gen
