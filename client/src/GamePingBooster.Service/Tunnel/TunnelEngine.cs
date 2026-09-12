@@ -257,10 +257,28 @@ internal sealed class TunnelEngine : IAsyncDisposable
         if (!string.IsNullOrWhiteSpace(_config.ProfilePath))
         {
             candidates.Add(_config.ProfilePath);
+            var parentDir = Path.GetDirectoryName(_config.ProfilePath);
+            if (!string.IsNullOrWhiteSpace(parentDir))
+            {
+                candidates.Add(parentDir);
+            }
         }
 
         candidates.Add("profiles");
         candidates.Add(Path.Combine(AppContext.BaseDirectory, "profiles"));
+
+        var commonData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+        if (!string.IsNullOrWhiteSpace(commonData))
+        {
+            candidates.Add(Path.Combine(commonData, "GamePingBooster", "profiles"));
+            candidates.Add(Path.Combine(commonData, "GamePingBooster", "profile.json"));
+        }
+
+        var progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        if (!string.IsNullOrWhiteSpace(progFiles))
+        {
+            candidates.Add(Path.Combine(progFiles, "Game Ping Booster", "profiles"));
+        }
 
         var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -520,10 +538,9 @@ internal sealed class TunnelEngine : IAsyncDisposable
             }
 
             // Explicit game selection is required before bringing the tunnel up. Without one,
-            // the engine has no way of knowing which CIDR ranges to install, and auto-detect
-            // led to race conditions when multiple game clients or launchers ran simultaneously.
+            // the engine has no way of knowing which CIDR ranges to install.
             _selectedGameId = string.IsNullOrWhiteSpace(gameId) ? _selectedGameId : gameId;
-            if (string.IsNullOrWhiteSpace(_selectedGameId) || _selectedGameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(_selectedGameId))
             {
                 throw new InvalidOperationException("No game selected. Please select a game before connecting.");
             }
@@ -1614,8 +1631,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
 
     public void SetSelectedGame(string? gameId)
     {
-        // Ignore blank or obsolete "auto" verbs from older callers.
-        if (string.IsNullOrWhiteSpace(gameId) || gameId.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(gameId))
         {
             return;
         }
@@ -2108,7 +2124,7 @@ internal sealed class TunnelEngine : IAsyncDisposable
         if (_profile is null || _profile.Games.Count == 0)
             throw new InvalidOperationException("The profile declares no games.");
 
-        if (string.IsNullOrWhiteSpace(id) || id.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(id))
         {
             throw new InvalidOperationException("No game selected. Please select a game before connecting.");
         }

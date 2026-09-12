@@ -72,7 +72,7 @@ $newConfig = [ordered]@{
     licenceUrl     = ""
     defaultRelayId = $null
     relayEndpoints = $existingRelays
-    defaultGameId  = "auto"
+    defaultGameId  = $null
     adapterName    = "Game Ping Booster"
     routeWithoutGame = $false
 }
@@ -92,6 +92,6 @@ Start-Sleep -Seconds 2
 $status = Get-Service $svcName
 Write-Host "========================================================" -ForegroundColor Green
 Write-Host "Service '$svcName' is now: $($status.Status)" -ForegroundColor Green
-Write-Host "Multi-game support (Auto-detect, CS2, PUBG) active!" -ForegroundColor Green
+Write-Host "Multi-game support (CS2, PUBG) active!" -ForegroundColor Green
 Write-Host "========================================================" -ForegroundColor Green
 Start-Sleep -Seconds 2

@@ -318,9 +318,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private GameOptionItem? _selectedGame;
 
     /// <summary>
-    /// The game chosen for this session. Null until picked: auto-detecting across running games
-    /// caused ambiguity when launchers or multiple supported games ran at once, and a player
-    /// always knows which game they sat down to play.
+    /// The game chosen for this session. Null until picked by the user from the dropdown.
     /// </summary>
     public GameOptionItem? SelectedGame
     {
@@ -619,7 +617,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             foreach (var g in status.AvailableGames)
             {
-                if (string.Equals(g.Id, "auto", StringComparison.OrdinalIgnoreCase)) continue;
                 if (!AvailableGames.Any(x => string.Equals(x.Id, g.Id, StringComparison.OrdinalIgnoreCase)))
                 {
                     AvailableGames.Add(new GameOptionItem(g.Id, g.Name));
@@ -629,7 +626,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
         // Only adopt the service's selection if the user hasn't made one yet (e.g. on first launch).
         // Once the user picks a game, the UI is authoritative.
-        if (_selectedGame is null && !string.IsNullOrEmpty(status.SelectedGameId) && !string.Equals(status.SelectedGameId, "auto", StringComparison.OrdinalIgnoreCase))
+        if (_selectedGame is null && !string.IsNullOrEmpty(status.SelectedGameId))
         {
             var current = AvailableGames.FirstOrDefault(g => g.Id.Equals(status.SelectedGameId, StringComparison.OrdinalIgnoreCase));
             if (current is not null)
